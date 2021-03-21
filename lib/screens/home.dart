@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:writenow/models/Search.dart';
+import 'package:writenow/models/note.dart';
 
 class Screen extends StatefulWidget {
   @override
@@ -7,18 +7,114 @@ class Screen extends StatefulWidget {
 }
 
 class HomeScreen extends State<Screen> {
-  final List<String> list = List.generate(100, (index) => "Note $index");
-  final List<String> displayedList = new List.empty();
+  final List<Note> list = [ new Note("Insa", "Habuit adpetentem debuerunt patriam illi Coriolanus debuerunt quatenus placet habuit Numne habuit rem ob videamus."),
+    new Note("Concours", "Coactique aliquotiens nostri pedites ad eos persequendos scandere clivos sublimes etiam si lapsantibus plantis fruticeta prensando vel dumos ad vertices venerint summos, inter arta tamen et invia nullas acies explicare permissi nec firmare nisu valido gressus: hoste discursatore rupium abscisa volvente, ruinis ponderum inmanium consternuntur, aut ex necessitate ultima fortiter dimicante, superati periculose per prona discedunt."),
+    new Note("Mots anglais", "Efferebantur quam comes et in desperatio incendebat efferebantur sudoribus tuebatur Castricius comes saeviore saeviore Castricius comes tresque sudoribus rabie viribus desperatio saeviore induratae quam matris tuebatur incendebat in viribus Castricius."),
+    new Note("Anniversaire", "Excusatio consuetudo curriculoque locati se ut Fanni Turpis Turpis tum."),
+    new Note("CCP", "Arva tractus Assyriis rebus: tractus."),
+    new Note("Ada") ];
+  final List<Note> displayedList = [  ];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //appBar: appBar(context),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      floatingActionButton: floatingButtonUI(),
+
+      body: Center(
+        child: Scrollbar(
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: list.length + 1,
+            controller: _scrollController,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return searchBarUI();
+              }
+              return noteUI(index-1);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget floatingButtonUI() {
+    return FloatingActionButton(
+      onPressed: () => setState(() {
+        print("Note added");
+        list.add(new Note("Note " + list.length.toString()));
+      }),
+      child: Icon(Icons.add),
+      backgroundColor: Color(0xFF9C9C9C),
+    );
+  }
+
+  Widget noteUI(int index) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      padding: EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30.0),
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 6),
+            blurRadius: 6,
+            spreadRadius: 2,
+            color: Color(0xFFE6E6E6),
+          ),
+        ],
+      ),
+      child: Column(
         children: <Widget>[
-          searchBarUI(),
-        ]
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                list[index].getName(),
+                style: TextStyle(
+                  color: Color(0xFF424242),
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                list[index].getDate().hour.toString() + ":" + list[index].getDate().minute.toString(),
+                style: TextStyle(
+                  color: Color(0xFF6B6B6B),
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.0),
+          Text(
+            list[index].getContent(),
+            style: TextStyle(
+              color: Color(0xFF424242),
+              fontSize: 16.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 10.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                list[index].getDate().day.toString() + "/" + list[index].getDate().month.toString() + "/" + list[index].getDate().year.toString(),
+                style: TextStyle(
+                  color: Color(0xFF6B6B6B),
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -51,7 +147,7 @@ class HomeScreen extends State<Screen> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: Text('Search'),
-                content: Text('You search "$value". There is ${ (list.where((element) => element.contains(value))).length } in the list.'),
+                content: Text('You search "$value". There is ${ (list.where((element) => element.getName().toLowerCase().contains(value.toLowerCase()))).length } in the list.'),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () { Navigator.pop(context); },
