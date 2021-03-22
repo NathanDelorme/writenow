@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:writenow/models/note.dart';
+import 'package:writenow/screens/settings.dart' as Settings;
+import 'package:writenow/screens/edition.dart' as Edition;
+import 'package:adaptive_theme/adaptive_theme.dart';
 
 class Screen extends StatefulWidget {
   @override
@@ -19,7 +22,6 @@ class HomeScreen extends State<Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: appBar(context),
       floatingActionButton: floatingButtonUI(),
 
       body: Center(
@@ -29,9 +31,17 @@ class HomeScreen extends State<Screen> {
             itemCount: list.length + 1,
             controller: _scrollController,
             itemBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return searchBarUI();
-              }
+              if (index == 0)
+                return Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      SizedBox(height: 80.0),
+                      searchBarUI(),
+                      settingsButtonUI(),
+                    ],
+                  ),
+                );
               return noteUI(index-1);
             },
           ),
@@ -52,18 +62,23 @@ class HomeScreen extends State<Screen> {
   }
 
   Widget noteUI(int index) {
-    return Container(
+    return
+      GestureDetector(
+        onTap: () {
+          print("Modifer la note : " + list[index].getName());
+        },
+      child: Container(
       margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       padding: EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(30.0),
         boxShadow: [
           BoxShadow(
             offset: Offset(0, 6),
             blurRadius: 6,
             spreadRadius: 2,
-            color: Color(0xFFE6E6E6),
+            color: Theme.of(context).shadowColor,
           ),
         ],
       ),
@@ -75,7 +90,7 @@ class HomeScreen extends State<Screen> {
               Text(
                 list[index].getName(),
                 style: TextStyle(
-                  color: Color(0xFF424242),
+                  color: Theme.of(context).textTheme.bodyText1.color,
                   fontSize: 18.0,
                   fontWeight: FontWeight.w600,
                 ),
@@ -83,7 +98,7 @@ class HomeScreen extends State<Screen> {
               Text(
                 list[index].getDate().hour.toString() + ":" + list[index].getDate().minute.toString(),
                 style: TextStyle(
-                  color: Color(0xFF6B6B6B),
+                  color: Theme.of(context).textTheme.bodyText2.color,
                   fontSize: 14.0,
                   fontWeight: FontWeight.w600,
                 ),
@@ -94,7 +109,7 @@ class HomeScreen extends State<Screen> {
           Text(
             list[index].getContent(),
             style: TextStyle(
-              color: Color(0xFF424242),
+              color: Theme.of(context).textTheme.bodyText1.color,
               fontSize: 16.0,
               fontWeight: FontWeight.w600,
             ),
@@ -107,7 +122,7 @@ class HomeScreen extends State<Screen> {
               Text(
                 list[index].getDate().day.toString() + "/" + list[index].getDate().month.toString() + "/" + list[index].getDate().year.toString(),
                 style: TextStyle(
-                  color: Color(0xFF6B6B6B),
+                  color: Theme.of(context).textTheme.bodyText2.color,
                   fontSize: 14.0,
                   fontWeight: FontWeight.w600,
                 ),
@@ -116,36 +131,37 @@ class HomeScreen extends State<Screen> {
           ),
         ],
       ),
-    );
+      ));
   }
 
   Widget searchBarUI() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            offset: Offset(0, 6),
-            blurRadius: 6,
-            spreadRadius: 2,
-            color: Color(0xFFE6E6E6),
-          ),
-        ],
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "Search",
-          icon: Icon(Icons.search),
-          border: InputBorder.none,
+    return Expanded(
+      child : Container(
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              offset: Offset(0, 6),
+              blurRadius: 6,
+              spreadRadius: 2,
+              color: Theme.of(context).shadowColor,
+            ),
+          ],
         ),
-        onSubmitted: (String value) async {
-          await showDialog<void>(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
+        child: TextField(
+          decoration: InputDecoration(
+            hintText: "Search",
+            icon: Icon(Icons.search, color: Theme.of(context).textTheme.bodyText2.color,),
+            border: InputBorder.none,
+          ),
+          onSubmitted: (String value) async {
+            await showDialog<void>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
                 title: Text('Search'),
                 content: Text('You search "$value". There is ${ (list.where((element) => element.getName().toLowerCase().contains(value.toLowerCase()))).length } in the list.'),
                 actions: <Widget>[
@@ -155,10 +171,48 @@ class HomeScreen extends State<Screen> {
                   ),
                 ],
               );
-            },
-          );
-        },
+              },
+            );
+          },
+        ),
       ),
+    );
+  }
+
+  Widget settingsButtonUI() {
+    return Container(
+      margin: EdgeInsets.only(right: 20.0),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 6),
+            blurRadius: 6,
+            spreadRadius: 2,
+            color: Theme.of(context).shadowColor,
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Material(
+          color: Theme.of(context).primaryColor,
+          child: InkWell(
+            splashColor: Theme.of(context).shadowColor,
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: Icon(
+                Icons.settings,
+                color: Theme.of(context).textTheme.bodyText2.color,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: ((context) => Settings.Screen())));
+            },
+          ),
+        ),
+      )
     );
   }
 }
